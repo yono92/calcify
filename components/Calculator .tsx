@@ -1,57 +1,21 @@
 import React, { useState, useEffect, useCallback } from "react";
-
-type OperatorType = "+" | "-" | "*" | "/" | "=";
-type NumberType =
-    | "0"
-    | "1"
-    | "2"
-    | "3"
-    | "4"
-    | "5"
-    | "6"
-    | "7"
-    | "8"
-    | "9"
-    | ".";
-
-interface CalculatorButtonProps {
-    onClick: () => void;
-    className: string;
-    children: React.ReactNode;
-}
-
-const CalculatorButton: React.FC<CalculatorButtonProps> = ({
-    onClick,
-    className,
-    children,
-}) => (
-    <button
-        onClick={onClick}
-        className={`p-4 rounded transition-colors ${className}`}
-    >
-        {children}
-    </button>
-);
+import Settings from "./Settings";
+import ScientificCalculator from "./ScientificCalculator";
+import BasicCalculator from "./BasicCalculator";
 
 const Calculator: React.FC = () => {
     const [display, setDisplay] = useState<string>("0");
     const [equation, setEquation] = useState<string>("");
     const [isNewNumber, setIsNewNumber] = useState<boolean>(true);
-    const [lastOperator, setLastOperator] = useState<OperatorType | null>(null);
+    const [lastOperator, setLastOperator] = useState<string | null>(null);
     const [lastNumber, setLastNumber] = useState<string>("");
+    const [isDarkMode, setIsDarkMode] = useState<boolean>(
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+    );
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isScientific, setIsScientific] = useState<boolean>(false);
 
-    const resetState = useCallback(() => {
-        setEquation("");
-        setIsNewNumber(true);
-        setLastOperator(null);
-        setLastNumber("");
-    }, []);
-
-    const clearDisplay = useCallback(() => {
-        setDisplay("0");
-        resetState();
-    }, [resetState]);
-
+    // 계산 로직
     const calculateResult = useCallback(() => {
         try {
             if (!lastOperator || !lastNumber) return;
@@ -83,133 +47,173 @@ const Calculator: React.FC = () => {
                     return;
             }
 
-            if (!isFinite(result)) {
-                throw new Error("Result is not finite");
-            }
-
             const resultString = Number.isInteger(result)
                 ? result.toString()
                 : result.toFixed(8).replace(/\.?0+$/, "");
 
             setDisplay(resultString);
-            resetState();
+            setEquation("");
+            setIsNewNumber(true);
+            setLastOperator(null);
+            setLastNumber("");
         } catch (error) {
-            console.error("Calculator error:", error);
             setDisplay("Error");
-            resetState();
+            setEquation("");
+            setIsNewNumber(true);
+            setLastOperator(null);
+            setLastNumber("");
         }
-    }, [lastOperator, lastNumber, display, resetState]);
+    }, [lastOperator, lastNumber, display]);
 
+    // 숫자 입력 처리
     const handleNumber = useCallback(
-        (num: NumberType): void => {
+        (num: string) => {
+            if (display === "Error") {
+                setDisplay(num);
+                setIsNewNumber(false);
+                return;
+            }
+
             if (isNewNumber) {
                 setDisplay(num);
                 setIsNewNumber(false);
             } else {
                 if (num === "." && display.includes(".")) return;
-                setDisplay(display + num);
+                if (display === "0" && num !== ".") {
+                    setDisplay(num);
+                } else {
+                    setDisplay(display + num);
+                }
             }
         },
         [display, isNewNumber]
     );
 
+    // 연산자 입력 처리
     const handleOperator = useCallback(
-        (operator: OperatorType): void => {
-            if (operator === "=") {
-                calculateResult();
-                return;
-            }
+        (operator: string) => {
+            if (display === "Error" && operator !== "C") return;
 
-            setLastOperator(operator);
-            setLastNumber(display);
-            setEquation(display + " " + operator + " ");
-            setIsNewNumber(true);
+            switch (operator) {
+                case "C":
+                    setDisplay("0");
+                    setEquation("");
+                    setIsNewNumber(true);
+                    setLastOperator(null);
+                    setLastNumber("");
+                    break;
+                case "DEL":
+                    if (!isNewNumber && display !== "0") {
+                        const newDisplay = display.slice(0, -1);
+                        setDisplay(newDisplay === "" ? "0" : newDisplay);
+                    }
+                    break;
+                case "=":
+                    calculateResult();
+                    break;
+                default:
+                    setLastOperator(operator);
+                    setLastNumber(display);
+                    setEquation(`${display} ${operator} `);
+                    setIsNewNumber(true);
+            }
         },
-        [display, calculateResult]
+        [display, isNewNumber, calculateResult]
     );
 
+    // Settings handlers
+    const handleThemeChange = (isDark: boolean) => {
+        setIsDarkMode(isDark);
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+    };
+
+    const handleModeChange = (scientific: boolean) => {
+        setIsScientific(scientific);
+        localStorage.setItem(
+            "calculatorMode",
+            scientific ? "scientific" : "basic"
+        );
+        setDisplay("0");
+        setEquation("");
+        setIsNewNumber(true);
+        setLastOperator(null);
+        setLastNumber("");
+    };
+
+    // Load saved preferences
     useEffect(() => {
-        const handleKeyPress = (event: KeyboardEvent) => {
-            if (/^[0-9.]$/.test(event.key)) {
-                handleNumber(event.key as NumberType);
-            } else if (["+", "-", "*", "/"].includes(event.key)) {
-                handleOperator(event.key as OperatorType);
-            } else if (event.key === "Enter") {
-                handleOperator("=");
-            } else if (event.key === "Escape") {
-                clearDisplay();
-            }
-        };
+        if (isDarkMode) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
 
-        window.addEventListener("keydown", handleKeyPress);
-        return () => window.removeEventListener("keydown", handleKeyPress);
-    }, [handleNumber, handleOperator, clearDisplay]);
-
-    const createNumberButton = (num: NumberType): JSX.Element => (
-        <CalculatorButton
-            key={num}
-            onClick={() => handleNumber(num)}
-            className="bg-gray-50 hover:bg-gray-100"
-        >
-            {num}
-        </CalculatorButton>
-    );
-
-    const createOperatorButton = (
-        operator: OperatorType,
-        display: string
-    ): JSX.Element => (
-        <CalculatorButton
-            onClick={() => handleOperator(operator)}
-            className="bg-gray-200 hover:bg-gray-300"
-        >
-            {display}
-        </CalculatorButton>
-    );
+        const savedMode = localStorage.getItem("calculatorMode");
+        if (savedMode) {
+            setIsScientific(savedMode === "scientific");
+        }
+    }, [isDarkMode]);
 
     return (
-        <div className="bg-white p-6 rounded-lg shadow-xl w-80">
-            <div className="mb-4">
-                <div className="text-gray-500 text-sm h-6 overflow-hidden">
-                    {equation}
-                </div>
-                <div className="text-right text-4xl font-bold text-gray-800 h-12 overflow-hidden">
-                    {display}
-                </div>
-            </div>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
+            {isSettingsOpen && (
+                <Settings
+                    isOpen={isSettingsOpen}
+                    onClose={() => setIsSettingsOpen(false)}
+                    isDarkMode={isDarkMode}
+                    isScientific={isScientific}
+                    onThemeChange={handleThemeChange}
+                    onModeChange={handleModeChange}
+                />
+            )}
 
-            <div className="grid grid-cols-4 gap-2">
-                <CalculatorButton
-                    onClick={clearDisplay}
-                    className="col-span-2 bg-red-500 hover:bg-red-600 text-white"
+            <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="fixed top-4 right-4 p-2 rounded-full 
+                        text-slate-500 hover:text-slate-700 hover:bg-slate-200/50
+                        dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-700/50
+                        transition-colors"
+            >
+                <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                 >
-                    AC
-                </CalculatorButton>
-                {createOperatorButton("/", "÷")}
-                {createOperatorButton("*", "×")}
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                    />
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                </svg>
+            </button>
 
-                {[7, 8, 9].map((num) =>
-                    createNumberButton(num.toString() as NumberType)
+            {/* Calculator */}
+            <div className="w-full max-w-sm mx-auto">
+                {isScientific ? (
+                    <ScientificCalculator
+                        onNumberClick={handleNumber}
+                        onOperatorClick={handleOperator}
+                        onSettingsClick={() => setIsSettingsOpen(true)}
+                        display={display}
+                        equation={equation}
+                    />
+                ) : (
+                    <BasicCalculator
+                        onNumberClick={handleNumber}
+                        onOperatorClick={handleOperator}
+                        onSettingsClick={() => setIsSettingsOpen(true)}
+                        display={display}
+                        equation={equation}
+                    />
                 )}
-                {createOperatorButton("-", "-")}
-
-                {[4, 5, 6].map((num) =>
-                    createNumberButton(num.toString() as NumberType)
-                )}
-                {createOperatorButton("+", "+")}
-
-                {[1, 2, 3].map((num) =>
-                    createNumberButton(num.toString() as NumberType)
-                )}
-                <CalculatorButton
-                    onClick={() => handleOperator("=")}
-                    className="bg-blue-500 hover:bg-blue-600 text-white row-span-2"
-                >
-                    =
-                </CalculatorButton>
-
-                <div className="col-span-2">{createNumberButton("0")}</div>
-                {createNumberButton(".")}
             </div>
         </div>
     );

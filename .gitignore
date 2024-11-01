@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Electron
+release
+
+# Electron Builder
+.electron-builder
+
