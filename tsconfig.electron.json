@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "esModuleInterop": true,
+        "outDir": "./dist",
+        "rootDir": ".",
+        "strict": true,
+        "allowJs": true,
+        "checkJs": true,
+        "forceConsistentCasingInFileNames": true
+    },
+    "include": ["electron/**/*"],
+    "ts-node": {
+        "esm": true,
+        "experimentalSpecifierResolution": "node"
+    }
+}
