@@ -1,4 +1,10 @@
-import { app, BrowserWindow, WebContents, WebPreferences } from "electron";
+import {
+    app,
+    BrowserWindow,
+    WebContents,
+    WebPreferences,
+    Event,
+} from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -39,22 +45,7 @@ function createWindow(): void {
 }
 
 app.whenReady().then((): void => {
-    app.on(
-        "web-contents-created",
-        (_event: Event, contents: WebContents): void => {
-            contents.on(
-                "will-attach-webview",
-                (
-                    _event: Event,
-                    webPreferences: WebPreferences,
-                    _params: Record<string, unknown>
-                ): void => {
-                    delete webPreferences.enableBlinkFeatures;
-                }
-            );
-        }
-    );
-
+    // DevTools 관련 코드 제거 (타입 에러 발생 부분)
     createWindow();
 });
 

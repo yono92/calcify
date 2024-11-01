@@ -1,5 +1,4 @@
-// components/Calculator.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 type OperatorType = "+" | "-" | "*" | "/" | "=";
 type NumberType =
@@ -41,36 +40,31 @@ const Calculator: React.FC = () => {
     const [lastOperator, setLastOperator] = useState<OperatorType | null>(null);
     const [lastNumber, setLastNumber] = useState<string>("");
 
-    const handleNumber = (num: NumberType): void => {
-        if (isNewNumber) {
-            setDisplay(num);
-            setIsNewNumber(false);
-        } else {
-            if (num === "." && display.includes(".")) return;
-            setDisplay(display + num);
-        }
-    };
-
-    const handleOperator = (operator: OperatorType): void => {
-        if (operator === "=") {
-            calculateResult();
-            return;
-        }
-
-        setLastOperator(operator);
-        setLastNumber(display);
-        setEquation(display + " " + operator + " ");
+    const resetState = useCallback(() => {
+        setEquation("");
         setIsNewNumber(true);
-    };
+        setLastOperator(null);
+        setLastNumber("");
+    }, []);
 
-    const calculateResult = (): void => {
+    const clearDisplay = useCallback(() => {
+        setDisplay("0");
+        resetState();
+    }, [resetState]);
+
+    const calculateResult = useCallback(() => {
         try {
             if (!lastOperator || !lastNumber) return;
+            if (display === "Error") return;
 
             const num1 = parseFloat(lastNumber);
             const num2 = parseFloat(display);
-            let result: number;
 
+            if (isNaN(num1) || isNaN(num2)) {
+                throw new Error("Invalid number");
+            }
+
+            let result: number;
             switch (lastOperator) {
                 case "+":
                     result = num1 + num2;
@@ -89,29 +83,68 @@ const Calculator: React.FC = () => {
                     return;
             }
 
-            setDisplay(result.toString());
-            setEquation("");
-            setIsNewNumber(true);
-            setLastOperator(null);
-            setLastNumber("");
+            if (!isFinite(result)) {
+                throw new Error("Result is not finite");
+            }
+
+            const resultString = Number.isInteger(result)
+                ? result.toString()
+                : result.toFixed(8).replace(/\.?0+$/, "");
+
+            setDisplay(resultString);
+            resetState();
         } catch (error) {
+            console.error("Calculator error:", error);
             setDisplay("Error");
-            setEquation("");
-            setIsNewNumber(true);
-            setLastOperator(null);
-            setLastNumber("");
+            resetState();
         }
-    };
+    }, [lastOperator, lastNumber, display, resetState]);
 
-    const clearDisplay = (): void => {
-        setDisplay("0");
-        setEquation("");
-        setIsNewNumber(true);
-        setLastOperator(null);
-        setLastNumber("");
-    };
+    const handleNumber = useCallback(
+        (num: NumberType): void => {
+            if (isNewNumber) {
+                setDisplay(num);
+                setIsNewNumber(false);
+            } else {
+                if (num === "." && display.includes(".")) return;
+                setDisplay(display + num);
+            }
+        },
+        [display, isNewNumber]
+    );
 
-    // 숫자 버튼 생성 헬퍼 함수
+    const handleOperator = useCallback(
+        (operator: OperatorType): void => {
+            if (operator === "=") {
+                calculateResult();
+                return;
+            }
+
+            setLastOperator(operator);
+            setLastNumber(display);
+            setEquation(display + " " + operator + " ");
+            setIsNewNumber(true);
+        },
+        [display, calculateResult]
+    );
+
+    useEffect(() => {
+        const handleKeyPress = (event: KeyboardEvent) => {
+            if (/^[0-9.]$/.test(event.key)) {
+                handleNumber(event.key as NumberType);
+            } else if (["+", "-", "*", "/"].includes(event.key)) {
+                handleOperator(event.key as OperatorType);
+            } else if (event.key === "Enter") {
+                handleOperator("=");
+            } else if (event.key === "Escape") {
+                clearDisplay();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyPress);
+        return () => window.removeEventListener("keydown", handleKeyPress);
+    }, [handleNumber, handleOperator, clearDisplay]);
+
     const createNumberButton = (num: NumberType): JSX.Element => (
         <CalculatorButton
             key={num}
@@ -122,7 +155,6 @@ const Calculator: React.FC = () => {
         </CalculatorButton>
     );
 
-    // 연산자 버튼 생성 헬퍼 함수
     const createOperatorButton = (
         operator: OperatorType,
         display: string
