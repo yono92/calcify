@@ -1,4 +1,5 @@
 import React from "react";
+import { useEffect } from "react";
 
 interface ScientificCalculatorProps {
     onNumberClick: (num: string) => void;
@@ -59,6 +60,123 @@ const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
             {display}
         </button>
     );
+
+    // 키보드 이벤트 처리
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // 기본 동작 방지할 키들
+            const preventDefaultKeys = [
+                "/",
+                "*",
+                "-",
+                "+",
+                "=",
+                "Enter",
+                "Escape",
+                "Backspace",
+                "p",
+                "e",
+                "s",
+                "c",
+                "t",
+                "r",
+                "q",
+            ];
+            if (preventDefaultKeys.includes(event.key.toLowerCase())) {
+                event.preventDefault();
+            }
+
+            // Shift 키와 함께 눌린 경우
+            if (event.shiftKey) {
+                switch (event.key) {
+                    case "^":
+                        onOperatorClick("^");
+                        return;
+                    case "6": // ^ key
+                        onOperatorClick("x²");
+                        return;
+                    case "|":
+                        onOperatorClick("|x|");
+                        return;
+                }
+            }
+
+            // 일반 숫자와 소수점
+            if (/^[0-9.]$/.test(event.key)) {
+                onNumberClick(event.key);
+                return;
+            }
+
+            // 기본 연산자와 특수 키
+            switch (event.key.toLowerCase()) {
+                // 기본 연산자
+                case "/":
+                    onOperatorClick("/");
+                    break;
+                case "*":
+                    onOperatorClick("*");
+                    break;
+                case "-":
+                    onOperatorClick("-");
+                    break;
+                case "+":
+                    onOperatorClick("+");
+                    break;
+                case "=":
+                case "enter":
+                    onOperatorClick("=");
+                    break;
+                case "escape":
+                    onOperatorClick("C");
+                    break;
+                case "backspace":
+                    onOperatorClick("DEL");
+                    break;
+
+                // 과학 계산기 특수 키
+                case "s":
+                    onOperatorClick("sin");
+                    break;
+                case "c":
+                    onOperatorClick("cos");
+                    break;
+                case "t":
+                    onOperatorClick("tan");
+                    break;
+                case "r":
+                    onOperatorClick("sqrt");
+                    break;
+                case "p":
+                    onOperatorClick("pi");
+                    break;
+                case "e":
+                    onOperatorClick("e");
+                    break;
+                case "q":
+                    onOperatorClick("sqrt");
+                    break;
+
+                // 메모리 기능
+                case "m":
+                    if (event.ctrlKey || event.metaKey) {
+                        if (event.shiftKey) {
+                            onOperatorClick("m+");
+                        } else {
+                            onOperatorClick("mc");
+                        }
+                    }
+                    break;
+            }
+        };
+
+        // 이벤트 리스너 등록
+        window.addEventListener("keydown", handleKeyDown);
+
+        // 클린업 함수
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [onNumberClick, onOperatorClick]);
 
     return (
         <div

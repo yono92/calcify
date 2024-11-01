@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 interface BasicCalculatorProps {
     onNumberClick: (num: string) => void;
@@ -24,14 +24,77 @@ const BasicCalculator: React.FC<BasicCalculatorProps> = ({
                 transition-all duration-200
                 transform active:scale-95
                 ${num === "0" ? "col-span-2" : ""}
-                bg-slate-800 hover:bg-slate-700 active:bg-slate-600
-                text-slate-200
+                bg-slate-100 hover:bg-slate-200 active:bg-slate-300
+                dark:bg-slate-800 dark:hover:bg-slate-700 dark:active:bg-slate-600 
+                text-slate-900 dark:text-slate-200
                 shadow-sm
             `}
         >
             {num}
         </button>
     );
+
+    // 키보드 이벤트 처리
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // event.preventDefault()를 선택적으로 호출
+            const preventDefaultKeys = [
+                "/",
+                "*",
+                "-",
+                "+",
+                "=",
+                "Enter",
+                "Escape",
+                "Backspace",
+            ];
+            if (preventDefaultKeys.includes(event.key)) {
+                event.preventDefault();
+            }
+
+            // 숫자와 소수점
+            if (/^[0-9.]$/.test(event.key)) {
+                onNumberClick(event.key);
+                return;
+            }
+
+            // 연산자
+            switch (event.key) {
+                case "/":
+                    onOperatorClick("/");
+                    break;
+                case "*":
+                    onOperatorClick("*");
+                    break;
+                case "-":
+                    onOperatorClick("-");
+                    break;
+                case "+":
+                    onOperatorClick("+");
+                    break;
+                case "=":
+                case "Enter":
+                    onOperatorClick("=");
+                    break;
+                case "Escape":
+                    onOperatorClick("C");
+                    break;
+                case "Backspace":
+                    onOperatorClick("DEL");
+                    break;
+                default:
+                    break;
+            }
+        };
+
+        // 이벤트 리스너 등록
+        window.addEventListener("keydown", handleKeyDown);
+
+        // 클린업 함수
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [onNumberClick, onOperatorClick]);
 
     const createOperatorButton = (
         operator: string,
@@ -55,16 +118,18 @@ const BasicCalculator: React.FC<BasicCalculatorProps> = ({
 
     return (
         <div
-            className="relative w-[320px] mx-auto p-6 rounded-2xl bg-slate-900/95 
-                    backdrop-blur-lg shadow-2xl
-                    border border-slate-800"
+            className="relative w-[320px] mx-auto p-6 rounded-2xl 
+        bg-white/95 dark:bg-slate-900/95 
+        backdrop-blur-lg shadow-2xl
+        border border-slate-200 dark:border-slate-800"
         >
             {/* Settings Button */}
             <button
                 onClick={onSettingsClick}
                 className="absolute top-2 right-2 p-2 rounded-full 
-                        text-slate-400 hover:text-slate-200 hover:bg-slate-800
-                        transition-colors"
+            text-slate-600 hover:text-slate-800 hover:bg-slate-200
+            dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800
+            transition-colors"
             >
                 <svg
                     className="w-5 h-5"
@@ -89,10 +154,10 @@ const BasicCalculator: React.FC<BasicCalculatorProps> = ({
 
             {/* Display */}
             <div className="mb-4 space-y-1 mt-4">
-                <div className="text-slate-400 text-sm h-6 overflow-hidden text-right">
+                <div className="text-slate-600 dark:text-slate-400 text-sm h-6 overflow-hidden text-right">
                     {equation}
                 </div>
-                <div className="text-right text-4xl font-bold text-white h-12 overflow-hidden tracking-wider">
+                <div className="text-right text-4xl font-bold text-slate-900 dark:text-white h-12 overflow-hidden tracking-wider">
                     {display}
                 </div>
             </div>
@@ -102,9 +167,10 @@ const BasicCalculator: React.FC<BasicCalculatorProps> = ({
                 {/* First Row */}
                 <button
                     onClick={() => onOperatorClick("C")}
-                    className="col-span-2 bg-red-500/90 hover:bg-red-600 active:bg-red-700 
-                            text-white p-4 rounded-lg font-medium transition-all duration-200 
-                            transform active:scale-95"
+                    className="col-span-2 bg-red-500 hover:bg-red-600 active:bg-red-700 
+                dark:bg-red-500/90 dark:hover:bg-red-600 dark:active:bg-red-700 
+                text-white p-4 rounded-lg font-medium transition-all duration-200 
+                transform active:scale-95"
                 >
                     AC
                 </button>
@@ -135,8 +201,8 @@ const BasicCalculator: React.FC<BasicCalculatorProps> = ({
                 <button
                     onClick={() => onOperatorClick("=")}
                     className="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 
-                            text-white p-4 rounded-lg font-medium transition-all duration-200 
-                            transform active:scale-95"
+                text-white p-4 rounded-lg font-medium transition-all duration-200 
+                transform active:scale-95"
                 >
                     =
                 </button>
