@@ -41,6 +41,7 @@
             "darkModeSupport": true
         },
         "win": {
+            "icon": "build/calcify.ico",
             "target": [
                 {
                     "target": "nsis",
