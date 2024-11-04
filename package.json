@@ -1,33 +1,44 @@
 {
     "name": "calcify",
     "private": true,
-    "version": "0.0.0",
+    "version": "1.0.0",
     "type": "module",
-    "main": "./dist/electron/main.js",
+    "main": "dist/electron/main.js",
+    "description": "calculator simplify",
+    "author": {
+        "name": "yono",
+        "email": "oxwk123@gmail.com"
+    },
     "scripts": {
         "dev": "vite",
-        "build": "tsc && vite build",
+        "build": "vite build",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "preview": "vite preview",
         "compile:electron": "tsc -p tsconfig.electron.json",
         "electron:dev": "npm run compile:electron && cross-env VITE_DEV=true concurrently \"npm run dev\" \"wait-on tcp:5173 && electron .\"",
-        "electron:build": "npm run build && electron-builder"
+        "electron:build": "npm run build && npm run compile:electron && electron-builder --config.asar=true"
     },
     "build": {
         "appId": "com.electron.calcify",
         "productName": "Calcify",
+        "asar": true,
         "directories": {
-            "output": "release/${version}"
+            "buildResources": "build",
+            "output": "release"
         },
         "files": [
-            "dist/**/*",
-            "package.json"
+            "dist/electron/main.js",    
+            "dist/index.html",          
+            "dist/assets/**/*"          
         ],
         "mac": {
+            "icon": "build/calcify.icns",
             "artifactName": "${productName}_${version}.${ext}",
-            "target": [
-                "dmg"
-            ]
+            "target": [{
+                "target": "dmg",
+                "arch": ["arm64"]  
+            }],
+            "darkModeSupport": true
         },
         "win": {
             "target": [

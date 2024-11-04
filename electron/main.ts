@@ -36,7 +36,13 @@ function createWindow(): void {
             win.webContents.openDevTools({ mode: "detach" });
         });
     } else {
-        win.loadFile(path.join(__dirname, "../index.html"));
+        // 프로덕션 환경에서의 경로 수정
+        const indexPath = path.join(__dirname, "..", "index.html");
+        console.log("Loading file from:", indexPath);  // 디버깅용
+        win.loadFile(indexPath).catch(e => console.error('Failed to load file:', e));
+        
+        // 프로덕션 환경에서도 개발자 도구 열기 (디버깅용)
+        // win.webContents.openDevTools();
     }
 
     win.webContents.on("devtools-opened", (): void => {
