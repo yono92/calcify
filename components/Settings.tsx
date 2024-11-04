@@ -1,76 +1,87 @@
 import React from "react";
+import { Switch } from "./ui/switch";
+import { Label } from "./ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 
-const Settings = ({
+interface SettingsProps {
+    isOpen: boolean;
+    onClose: () => void;
+    isDarkMode: boolean;
+    isScientific: boolean;
+    isRadianMode: boolean;
+    onThemeChange: (isDark: boolean) => void;
+    onModeChange: (scientific: boolean) => void;
+    onAngleModeChange: (isRadian: boolean) => void;
+}
+
+const Settings: React.FC<SettingsProps> = ({
     isOpen,
     onClose,
     isDarkMode,
     isScientific,
+    isRadianMode,
     onThemeChange,
-    onModeChange
+    onModeChange,
+    onAngleModeChange,
 }) => {
-    if (!isOpen) return null;
-
     return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-            onClick={(e) => {
-                if (e.target === e.currentTarget) onClose();
-            }}
-        >
-            <div className="w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-xl transform transition-all">
-                <div className="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-700">
-                    <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
-                        Settings
-                    </h2>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-500 dark:text-slate-400 transition-colors"
-                    >
-                        ✕
-                    </button>
-                </div>
-
-                <div className="p-4 space-y-4">
-                    {/* Dark Mode Toggle */}
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>설정</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6">
+                    {/* 다크 모드 설정 */}
                     <div className="flex items-center justify-between">
-                        <span className="text-slate-700 dark:text-slate-300">
-                            Dark Mode
-                        </span>
-                        <button
-                            onClick={() => onThemeChange(!isDarkMode)}
-                            className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${
-                                isDarkMode ? "bg-blue-600" : "bg-slate-300"
-                            }`}
-                        >
-                            <div
-                                className={`w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
-                                    isDarkMode ? "translate-x-6" : "translate-x-0"
-                                }`}
-                            />
-                        </button>
+                        <div className="space-y-1">
+                            <Label htmlFor="dark-mode">다크 모드</Label>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                어두운 테마를 사용합니다
+                            </p>
+                        </div>
+                        <Switch
+                            id="dark-mode"
+                            checked={isDarkMode}
+                            onCheckedChange={onThemeChange}
+                        />
                     </div>
 
-                    {/* Calculator Mode Toggle */}
+                    {/* 계산기 모드 설정 */}
                     <div className="flex items-center justify-between">
-                        <span className="text-slate-700 dark:text-slate-300">
-                            Scientific Mode
-                        </span>
-                        <button
-                            onClick={() => onModeChange(!isScientific)}
-                            className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ${
-                                isScientific ? "bg-blue-600" : "bg-slate-300"
-                            }`}
-                        >
-                            <div
-                                className={`w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
-                                    isScientific ? "translate-x-6" : "translate-x-0"
-                                }`}
-                            />
-                        </button>
+                        <div className="space-y-1">
+                            <Label htmlFor="calculator-mode">
+                                공학용 계산기
+                            </Label>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                고급 수학 함수를 사용합니다
+                            </p>
+                        </div>
+                        <Switch
+                            id="calculator-mode"
+                            checked={isScientific}
+                            onCheckedChange={onModeChange}
+                        />
                     </div>
+
+                    {/* 각도 모드 설정 */}
+                    {isScientific && (
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                                <Label htmlFor="angle-mode">라디안 모드</Label>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">
+                                    각도 대신 라디안을 사용합니다
+                                </p>
+                            </div>
+                            <Switch
+                                id="angle-mode"
+                                checked={isRadianMode}
+                                onCheckedChange={onAngleModeChange}
+                            />
+                        </div>
+                    )}
                 </div>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 };
 
