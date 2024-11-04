@@ -1,11 +1,11 @@
 {
     "compilerOptions": {
         "target": "ESNext",
-        "module": "ESNext",
-        "moduleResolution": "Bundler",
+        "module": "NodeNext",        // CommonJS에서 NodeNext로 변경
+        "moduleResolution": "NodeNext",  // Node에서 NodeNext로 변경
         "esModuleInterop": true,
         "outDir": "./dist/electron",
-        "rootDir": ".",
+        "rootDir": "./electron",     // 변경: electron 폴더를 루트로 지정
         "strict": true,
         "allowJs": true,
         "checkJs": true,
@@ -14,7 +14,8 @@
         "allowSyntheticDefaultImports": true,
         "jsx": "react-jsx"
     },
-    "include": ["electron/**/*", "src/**/*"],
+    // "include": ["electron/**/*", "src/**/*"],
+    "include": ["electron/**/*"],   // electron 폴더만 포함
     "ts-node": {
         "esm": true,
         "experimentalSpecifierResolution": "node"
