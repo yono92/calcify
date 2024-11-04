@@ -12,7 +12,7 @@ const __dirname: string = path.dirname(fileURLToPath(import.meta.url));
 
 function createWindow(): void {
     const win: BrowserWindow = new BrowserWindow({
-        width: 400,
+        width: 500,
         height: 600,
         webPreferences: {
             nodeIntegration: true,

@@ -117,6 +117,7 @@ const BasicCalculator: React.FC<BasicCalculatorProps> = ({
     );
 
     return (
+        <div className="w-full h-full bg-slate-900 flex flex-col">
         <div
             className="relative w-[320px] mx-auto p-6 rounded-2xl 
         bg-white/95 dark:bg-slate-900/95 
@@ -206,6 +207,7 @@ const BasicCalculator: React.FC<BasicCalculatorProps> = ({
                 >
                     =
                 </button>
+            </div>
             </div>
         </div>
     );

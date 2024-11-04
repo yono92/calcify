@@ -254,7 +254,7 @@ const Calculator: React.FC = () => {
     }, [isDarkMode]);
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
+        <div className="min-h-screen flex items-center justify-center">
             {isSettingsOpen && (
                 <Settings
                     isOpen={isSettingsOpen}
@@ -267,8 +267,8 @@ const Calculator: React.FC = () => {
             )}
 
             {/* Calculator */}
-            <div className="w-full max-w-sm mx-auto">
-                {isScientific ? (
+            <div className={`${isScientific ? 'w-[400px] h-[600px]' : 'w-[320px] h-[500px]'} rounded-3xl overflow-hidden`}>
+            {isScientific ? (
                     <ScientificCalculator
                         onNumberClick={handleNumber}
                         onOperatorClick={handleOperator}

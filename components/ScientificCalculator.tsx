@@ -179,6 +179,7 @@ const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
     }, [onNumberClick, onOperatorClick]);
 
     return (
+        <div className="w-full h-full bg-slate-900 flex flex-col">
         <div
             className="relative w-[400px] mx-auto p-6 rounded-2xl 
                     bg-white/95 dark:bg-slate-900/95 
@@ -288,6 +289,7 @@ const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
                     =
                 </button>
             </div>
+        </div>
         </div>
     );
 };
