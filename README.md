@@ -1,50 +1,96 @@
-# React + TypeScript + Vite
+# Calcify
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+기본 계산기와 공학용 계산기를 모두 지원하는 크로스 플랫폼 데스크톱 애플리케이션입니다.
 
-Currently, two official plugins are available:
+## 주요 기능
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 💡 기본/공학용 계산기 모드 전환
+- 🌓 라이트/다크 모드 지원
+- ⌨️ 키보드 입력 지원
+- 🧮 메모리 기능 (MC, MR, M+, M-, MS) 개발 중
+- 📐 공학용 계산기 기능
+  - 삼각함수 (sin, cos, tan)
+  - 수학 상수 (π, e)
+  - 고급 연산 (√, x², xʸ, |x|, 1/x)
 
-## Expanding the ESLint configuration
+## 기술 스택
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+### 프론트엔드
 
-- Configure the top-level `parserOptions` property like this:
+- React 18.3.1
+- TypeScript 5.6.2
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- Tailwind CSS 3.4.14
+- Vite 5.4.10
+
+### 데스크톱 애플리케이션
+
+- Electron 33.0.2
+- electron-builder 25.1.8
+
+### 개발 도구
+
+- ESLint
+- concurrently
+- cross-env
+
+## 실행 방법
+
+### 개발 모드
+
+```bash
+# 의존성 설치
+npm install
+
+# 개발 서버 실행
+npm run electron:dev
+
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### 빌드
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+```bash
+# 프로덕션 빌드
+npm run electron:build
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
 ```
+
+## 단축키
+
+| 키                 | 기능      |
+| ------------------ | --------- |
+| `0-9`              | 숫자 입력 |
+| `+`, `-`, `*`, `/` | 기본 연산 |
+| `Enter`, `=`       | 계산      |
+| `Escape`           | 초기화    |
+| `Backspace`        | 삭제      |
+| `s`                | sin       |
+| `c`                | cos       |
+| `t`                | tan       |
+| `r`                | 제곱근    |
+| `p`                | π         |
+| `e`                | 자연상수  |
+
+## 시스템 요구사항
+
+- **Windows**: 64비트 Windows 10 이상
+- **macOS**: Apple Silicon (M1/M2) macOS 11.0 이상
+
+## 빌드 산출물
+
+- **Windows**: NSIS 인스톨러 (.exe)
+- **macOS**: DMG 패키지 (.dmg)
+
+## 프로젝트 구조
+
+```
+├── src/
+│   ├── components/         # React 컴포넌트
+├── build/                 # 빌드 리소스
+└── dist/                  # 빌드 출력
+
+```
+
+## 제작자
+
+- **개발자**: yono
